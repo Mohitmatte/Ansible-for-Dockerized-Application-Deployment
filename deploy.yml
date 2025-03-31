@@ -1,0 +1,24 @@
+---
+- name: Deploy Dockerized Flask App
+  hosts: webserver
+  become: yes  # Run as sudo
+  tasks:
+
+    - name: Install required packages
+      apt:
+        name: ['docker.io', 'python3-pip']
+        state: present
+        update_cache: yes
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull Docker image
+      command: docker pull mohitmatte/my-flask-app:latest
+
+    - name: Run Flask container
+      command: >
+        docker run -d --name flask-app -p 5000:5000 mohitmatte/my-flask-app:latest
