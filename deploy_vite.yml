@@ -1,0 +1,38 @@
+---
+- name: Deploy Vite Node.js App with Docker
+  hosts: webserver
+  become: yes
+  tasks:
+
+    - name: Install Docker
+      apt:
+        name: ['docker.io']
+        state: present
+        update_cache: yes
+
+    - name: Start Docker service
+      systemd:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Pull latest Vite app image from Docker Hub
+      community.docker.docker_image:
+        name: mohitmatte/my-vite-app
+        tag: latest
+        source: pull
+
+
+    - name: Run Vite app container
+      community.docker.docker_container:
+        name: my-vite-app
+        image: mohitmatte/my-vite-app:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "5174:5173"
+        env:
+          NODE_ENV: "production"
+
+    - name: Verify Vite app is running
+      command: docker ps
